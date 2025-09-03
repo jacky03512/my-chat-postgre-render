@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天室</title>
+</head>
+<body>
+    <h1>WebSocket</h1>
+    <ul id="messages"></ul>
+    <input id="username" placeholder="名字"/>
+    <input id="message" placeholder="訊息內容"/>
+    <button onclick="send()">送出</button>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        //const socket = io('http://localhost:3000');
+        const socket = io();
+        const messages = document.getElementById('messages');
+        const API_BASE_URL = location.hostname === 'localhost'
+        ? 'http://localhost:3000' : 'https://my-chat-app-render.onrender.com';
+
+        socket.on('new-message', (msg) => {
+            const li = document.createElement('li');
+            li.innerText = `${msg.username}: ${msg.content}`;
+            messages.appendChild(li);
+        });
+
+        async function send() {
+            const username = document.getElementById('username').value;
+            const content = document.getElementById('message').value;
+
+            await fetch(`${API_BASE_URL}/messages`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, content })  // ✅ 一致
+            });
+        }
+
+
+        // 初始化載入歷史資訊
+        //fetch('http://localhost:3000/messages')
+        fetch(`${API_BASE_URL}/messages`)
+        .then( res => res.json())
+        .then( data => {
+            data.forEach(msg => {
+                const li = document.createElement('li');
+                li.innerText = `${msg.username}: ${msg.content}`;
+                messages.appendChild(li);
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
